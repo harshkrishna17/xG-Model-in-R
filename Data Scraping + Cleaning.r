@@ -11,10 +11,9 @@ setwd("C:/Users/harsh_1mwi2o4/Downloads")
 data1 <- read.csv("fullshots.csv")
 
 data1 <- data1 %>%
-filter(!year == 2020) %>%
-filter(!situation == "Penalty")
+filter(!year == 2020)
 
-data1 <- data1[, c("X", "Y", "player", "shotType")]
+data1 <- data1[, c("X", "Y", "player", "shotType", "situation", "result")]
 
 # worldfootballR Scraping + Cleaning
 
@@ -34,20 +33,19 @@ df9 <- understat_league_season_shots(league = "Serie A", season_start_year = 202
 df10 <- understat_league_season_shots(league = "Serie A", season_start_year = 2021)
 
 data2 <- rbind(df1, df2, df3, df4, df5, df6, df7, df8, df9, df10)
-df <- data2
-data2 <- data2 %>%
-filter(!situation == "Penalty")
-
-data2 <- data2[, c("X", "Y", "player", "shotType")]
+data2 <- data2[, c("X", "Y", "player", "shotType", "situation", "result")]
 
 #' Joining two datasets
 
 data <- rbind(data1, data2)
 data <- data %>%
 mutate(NewX = X * 120) %>%
-mutate(NewY = Y * 80)
+mutate(NewY = Y * 80) %>%
+filter(!situation == "Penalty") %>%
+filter(!situation == "BlockedShot") %>%
+filter(!situation == "OwnGoal")
 
-data <- data[, c("NewX", "NewY", "player", "shotType")]
+data <- data[, c("NewX", "NewY", "player", "shotType", "result")]
 
 #' Saving dataset as .csv
 
