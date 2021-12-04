@@ -6,12 +6,12 @@ library(ggsoccer)
 library(understatr)
 library(ggpubr)
 
-#' Loading in Dataset + Minor Changes
+#' Function
+
+xGModel <- function(df) {
 
 setwd("C:/Users/harsh_1mwi2o4/Downloads")
 data <- read.csv("shotdata.csv")
-
-#' Calculations
 
 custom_distance <- function(NewX, NewY) {
     x_dist <- (120 - NewX)
@@ -50,8 +50,6 @@ mutate(type = ifelse(shotType == "Head", distance, distance + ratio))
 data$is_goal <- ifelse(data$result == "Goal", 1,0)
 data$is_goal <- factor(data$is_goal, levels = c("1", "0"))
 
-#' Modelling 
-
 set.seed(1234) 
 
 train_test_split <- initial_split(data = data, prop = 0.80) 
@@ -76,10 +74,6 @@ xg_fit <-
   xg_wflow %>% 
   fit(data = train_data)
 
-#' Testing on Understat dataset
-
-df <- get_player_shots(5555)
-
 df <- df %>%
 mutate(NewX = X * 120) %>%
 mutate(NewY = Y * 80) %>%
@@ -90,37 +84,7 @@ mutate(type = ifelse(shotType == "Head", distance, distance + ratio))
 data_pred <- predict(xg_fit, df, type = "prob") %>% 
   bind_cols(df) %>%
   rename("xGoals" = ".pred_1")
+}
 
-xg1 <- data_pred$xGoals
-xg <- data_pred$xG
-
-rsq <- function (x, y) {cor(x, y) ^ 2}
-rsq(xg, xg1)
-
-#' Plotting side-by-side
-
-data_pred <- data_pred %>%
-filter(year == 2020)
-
-p1 <- ggplot() +
-annotate_pitch(dimensions = pitch_statsbomb, fill = "black", colour = "white") +
-theme_pitch() +
-geom_point(data = data_pred, aes(NewX, NewY, colour = result, size = xG)) +
-labs(title = "Understat Model") +
-theme(plot.title = element_text(hjust = 0.5, size = 15)) +
-coord_flip() 
-
-p2 <- ggplot() +
-annotate_pitch(dimensions = pitch_statsbomb, fill = "black", colour = "white") +
-theme_pitch() +
-geom_point(data = data_pred, aes(NewX, NewY, colour = result, size = xGoals)) +
-labs(title = "Harsh's Model") +
-theme(plot.title = element_text(hjust = 0.5, size = 15)) +
-coord_flip() 
-
-fig <- ggarrange(p1, p2,
-ncol = 2, nrow = 1) +
-labs(title = "Marcus Rashford") +
-theme(plot.title = element_text(colour = "black", size = 20))
-
-fig
+df <- get_player_shots(553)
+dataframe <- xGModel(df)
